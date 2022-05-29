@@ -23,6 +23,7 @@ async function run (){
     await client.connect();
     const toolCollection = client.db("electricSaw").collection("tool");
     const orderCollection = client.db("electricSaw").collection("order");
+    const userCollection = client.db('electricSaw').collection('user');
     
     
 
@@ -33,13 +34,59 @@ async function run (){
       res.send(tools);
     });
     
-    app.get('/order',  async(req, res) =>{
-      const email = req.query.email;
-      const query = {email: email};
-      const cursor = orderCollection.find(query);
-      const orders = await cursor.toArray();
+    // app.get('/order',  async(req, res) =>{
+    //   const email = req.query.email;
+    //   const query = {email: email};
+    //   const cursor = orderCollection.find(query);
+    //   const orders = await cursor.toArray();
+    //   res.send(orders);
+    // });
+
+    app.get('/user',  async (req, res) => {
+      const users = await userCollection.find().toArray();
+      res.send(users);
+    });
+    
+    app.get('/order',  async (req, res) => {
+      const query=req.query.email;
+      const orders = await orderCollection.find({email:qurry}).toArray();
       res.send(orders);
     });
+  //   app.get('/order/:name',  async (req, res) => {
+  //     const name = req.params.name;
+      
+  //     const query=req.query.name;
+  //     const result = await orderCollection.findOne(query);
+  //     res.send(result);
+  //     console.log(req.params.body);
+  // });
+   
+
+    // app.get('/orders', async (req, res) => {
+    //   const name = req.query.name;
+    //   console.log(name);
+    //   const decodedEmail = req.decoded.email;
+    //   if (name === decodedEmail) {
+    //     const query = { name: name };
+    //     const orders = await orderCollection.find(query).toArray();
+    //     return res.send(orders);
+    //   }
+    //   else {
+    //     return res.status(403).send({ message: 'forbidden access' });
+    //   }
+    // })
+
+
+    // app.post('/order', async (req, res) => {
+    //   const order = req.body;
+    //   const query = { name: order.name, email: order.email }
+    //   const exists = await orderCollection.findOne(query);
+    //   if (exists) {
+    //     return res.send({ success: false, booking: exists })
+    //   }
+    //   const result = await orderCollection.insertOne(order);
+    //   return res.send({ success: true, result });
+    // })
 
     // get single items
 
@@ -84,6 +131,48 @@ async function run (){
       }
     };
     const result = await toolCollection.updateOne(filter, upDatedDoc, options);
+    res.send(result);
+
+  })
+
+  app.get('/admin/:email', async(req, res) =>{
+    const email = req.params.email;
+    const user = await userCollection.findOne({email: email});
+    const isAdmin = user.role === 'admin';
+    res.send({admin: isAdmin});
+  })
+
+
+
+  app.put('/user/admin/:email',  async (req, res) => {
+    const email = req.params.email;
+    const requester = req.decoded.email;
+    const requesterAccount = await userCollection.findOne({ email: requester });
+    if (requesterAccount.role === 'admin') {
+      const filter = { email: email };
+      const updateDoc = {
+        $set: { role: 'admin' },
+      };
+      const result = await userCollection.updateOne(filter, updateDoc);
+      res.send(result);
+    }
+    else{
+      res.status(403).send({message: 'forbidden'});
+    }
+
+  })
+
+  app.put('/user/:email',  async(req, res)=>{
+    const email = req.params.email;
+    console.log({email});
+    const user = req.body;
+    const filter ={email: email};
+    const options = { upsert: true};
+    const upDatedDoc = {
+      $set: user,
+      
+    };
+    const result = await userCollection.updateOne(filter, upDatedDoc, options);
     res.send(result);
 
   })
