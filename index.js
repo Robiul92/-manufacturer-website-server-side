@@ -9,7 +9,7 @@ const app = express();
 
 // middleware
 
-app.use(cors({origin:'https://electric-saw.web.app/'}));
+app.use(cors({origin:'https://electric-saw.web.app'}));
 app.use(express.json());
 
 
