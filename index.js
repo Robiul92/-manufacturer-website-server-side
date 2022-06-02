@@ -9,7 +9,7 @@ const app = express();
 
 // middleware
 
-app.use(cors());
+app.use(cors({origin:'https://electric-saw.web.app/'}));
 app.use(express.json());
 
 
@@ -49,7 +49,7 @@ async function run (){
     
     app.get('/order',  async (req, res) => {
       const query=req.query.email;
-      const orders = await orderCollection.find({email:qurry}).toArray();
+      const orders = await orderCollection.find().toArray();
       res.send(orders);
     });
   //   app.get('/order/:name',  async (req, res) => {
@@ -135,12 +135,12 @@ async function run (){
 
   })
 
-  app.get('/admin/:email', async(req, res) =>{
-    const email = req.params.email;
-    const user = await userCollection.findOne({email: email});
-    const isAdmin = user.role === 'admin';
-    res.send({admin: isAdmin});
-  })
+  // app.get('/admin/:email', async(req, res) =>{
+  //   const email = req.params.email;
+  //   const user = await userCollection.findOne({email: email});
+  //   const isAdmin = user.role === 'admin';
+  //   res.send({admin: isAdmin});
+  // })
 
 
 
@@ -176,6 +176,8 @@ async function run (){
     res.send(result);
 
   })
+
+  a
 
   }
 
